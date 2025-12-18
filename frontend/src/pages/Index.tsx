@@ -20,9 +20,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/layout/Header';
 
-/* ---------------------------------- */
-/* Animations */
-/* ---------------------------------- */
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 30 },
   show: {
@@ -30,7 +27,7 @@ const fadeUp: Variants = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: [0.16, 1, 0.3, 1], // ✅ TS-safe
+      ease: [0.16, 1, 0.3, 1], 
     },
   },
 };
@@ -44,9 +41,6 @@ const stagger: Variants = {
   },
 };
 
-/* ---------------------------------- */
-/* Animated Counter */
-/* ---------------------------------- */
 const AnimatedNumber = ({ value }: { value: number }) => {
   const count = useMotionValue(0);
   const rounded = useTransform(count, (latest) => Math.round(latest));
@@ -54,7 +48,7 @@ const AnimatedNumber = ({ value }: { value: number }) => {
   useEffect(() => {
     const controls = animate(count, value, {
       duration: 1.5,
-      ease: [0.16, 1, 0.3, 1], // ✅ TS-safe
+      ease: [0.16, 1, 0.3, 1], 
     });
 
     return controls.stop;
@@ -63,9 +57,6 @@ const AnimatedNumber = ({ value }: { value: number }) => {
   return <motion.span>{rounded}</motion.span>;
 };
 
-/* ---------------------------------- */
-/* Data */
-/* ---------------------------------- */
 const features = [
   {
     icon: Clock,
