@@ -3,16 +3,17 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Dashboard from "./pages/Dashboard";
-import ExamList from "./pages/ExamList";
-import TakeExam from "./pages/TakeExam";
-import ExamResult from "./pages/ExamResult";
-import Results from "./pages/Results";
-import AdminDashboard from "./pages/AdminDashboard";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import NotFound from "./pages/NotFound";
+import Index from "./pages/user/Index";
+import Dashboard from "./pages/user/Dashboard";
+import ExamList from "./pages/user/ExamList";
+import TakeExam from "./pages/user/TakeExam";
+import ExamResult from "./pages/user/ExamResult";
+import Results from "./pages/user/Results";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminLogin from "./pages/admin/AdminLogin";
+import Login from "./pages/user/Login";
+import Register from "./pages/user/Register";
+import NotFound from "./pages/user/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -30,9 +31,9 @@ const App = () => (
           <Route path="/exam-result" element={<ExamResult />} />
           <Route path="/results" element={<Results />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
