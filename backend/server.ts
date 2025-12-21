@@ -1,22 +1,28 @@
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import connectDB from "./db";
-import authRoutes from "./routes/auth";
+import mongoose from "mongoose";
+import authRoutes from "./routes/authRoutes";
+import dashboardRoutes from "./routes/dashboardRoutes";
 
 dotenv.config();
 
 const app = express();
 
-/* Middleware */
+/* =========================
+   Middleware
+========================= */
 app.use(cors({
   origin: process.env.FRONTEND_URL || "*",
   credentials: true,
 }));
 app.use(express.json());
 
-/* Routes */
+/* =========================
+   Routes
+========================= */
 app.use("/api/auth", authRoutes);
+app.use("/api", dashboardRoutes);
 
 /* Health Check */
 app.get("/", (_req: Request, res: Response) => {
@@ -34,15 +40,21 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   res.status(500).json({ message: "Internal Server Error" });
 });
 
+/* =========================
+   Connect to DB & Start Server
+========================= */
 const PORT = process.env.PORT || 5000;
 
-/* Start Server After DB Connect */
-(async () => {
+const startServer = async () => {
   try {
-    await connectDB();
+    await mongoose.connect(process.env.MONGO_URI!);
+    console.log("✅ MongoDB connected");
+
     app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   } catch (error) {
     console.error("❌ Failed to start server:", error);
     process.exit(1);
   }
-})();
+};
+
+startServer();
