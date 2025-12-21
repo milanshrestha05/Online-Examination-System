@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail";
+import { verifyToken, AuthRequest } from "../middleware/authMiddleware";
 
 const router = Router();
 
@@ -34,12 +35,10 @@ router.post("/register", async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Email already registered" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
     const user = await User.create({
       name,
       email,
-      password: hashedPassword,
+      password,
       role: "user",
     });
 
@@ -72,12 +71,12 @@ router.post("/login", async (req: Request, res: Response) => {
   }
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -101,19 +100,54 @@ router.post("/login", async (req: Request, res: Response) => {
 });
 
 /* =========================
+   GET PROFILE
+========================= */
+router.get("/me", verifyToken, async (req: AuthRequest, res: Response) => {
+  if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+
+  res.status(200).json({ user: req.user });
+});
+
+/* =========================
+   UPDATE PROFILE
+========================= */
+router.put("/profile", verifyToken, async (req: AuthRequest, res: Response) => {
+  if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+
+  const { name, password } = req.body;
+
+  if (name) req.user.name = name;
+  if (password) req.user.password = password; // will be hashed in pre-save
+
+  try {
+    await req.user.save();
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user: {
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role,
+      },
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+/* =========================
    FORGOT PASSWORD
 ========================= */
 router.post("/forgot-password", async (req: Request, res: Response) => {
   const { email } = req.body;
-
-  if (!email) {
-    return res.status(400).json({ message: "Email is required" });
-  }
+  if (!email) return res.status(400).json({ message: "Email is required" });
 
   try {
     const user = await User.findOne({ email });
 
-    // Always return 200 to avoid revealing whether email exists
+    // Always return 200 to prevent email enumeration
     if (!user) {
       return res.status(200).json({
         message: "If the email exists, a reset link has been sent",
@@ -123,7 +157,7 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
     const resetToken = crypto.randomBytes(32).toString("hex");
 
     user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+    user.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
     await user.save();
 
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
@@ -132,12 +166,10 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
       await sendEmail(
         user.email,
         "Reset your ExamPro password",
-        `
-          <p>You requested a password reset.</p>
-          <p>Click the link below to reset your password:</p>
-          <a href="${resetLink}">${resetLink}</a>
-          <p>This link expires in 15 minutes.</p>
-        `
+        `<p>You requested a password reset.</p>
+        <p>Click the link below to reset your password:</p>
+        <a href="${resetLink}">${resetLink}</a>
+        <p>This link expires in 15 minutes.</p>`
       );
       console.log("Password reset link sent to:", user.email);
     } catch (emailError) {
@@ -167,13 +199,13 @@ router.post("/reset-password", async (req: Request, res: Response) => {
     const user = await User.findOne({
       resetPasswordToken: token,
       resetPasswordExpires: { $gt: new Date() },
-    });
+    }).select("+password");
 
     if (!user) {
       return res.status(400).json({ message: "Invalid or expired token" });
     }
 
-    user.password = await bcrypt.hash(password, 10);
+    user.password = password; // hashed in pre-save
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
 

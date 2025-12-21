@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import authRoutes from "./routes/authRoutes";
 import dashboardRoutes from "./routes/dashboardRoutes";
+import feedbackRoutes from "./routes/FeedbackRoutes";
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use(express.json());
 ========================= */
 app.use("/api/auth", authRoutes);
 app.use("/api", dashboardRoutes);
+app.use("/api/feedback", feedbackRoutes);
 
 /* Health Check */
 app.get("/", (_req: Request, res: Response) => {

@@ -13,9 +13,11 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminLogin from "./pages/admin/AdminLogin";
 import Login from "./pages/user/Login";
 import Register from "./pages/user/Register";
+import Profile from "./pages/user/Profile";
 import ForgotPassword from "./pages/user/ForgotPassword";
 import ResetPassword from "./pages/user/ResetPassword";
 import NotFound from "./pages/user/NotFound";
+import Feedback from "./pages/user/Feedback";
 
 const queryClient = new QueryClient();
 
@@ -36,9 +38,11 @@ const App = () => (
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/feedback" element={<Feedback />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
