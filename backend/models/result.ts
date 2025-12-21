@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
-import { IExam } from "./exam";
 
+/* ---------------- Exam Answer Interface ---------------- */
 export interface ExamAnswer {
   questionId: string;
   selectedAnswer: string;
@@ -8,6 +8,7 @@ export interface ExamAnswer {
   pointsEarned: number;
 }
 
+/* ---------------- Result Interface ---------------- */
 export interface IResult extends Document {
   userId: Types.ObjectId;
   examId: Types.ObjectId;
@@ -24,6 +25,7 @@ export interface IResult extends Document {
   updatedAt: Date;
 }
 
+/* ---------------- Exam Answer Schema ---------------- */
 const ExamAnswerSchema: Schema<ExamAnswer> = new Schema({
   questionId: { type: String, required: true },
   selectedAnswer: { type: String, required: true },
@@ -31,6 +33,7 @@ const ExamAnswerSchema: Schema<ExamAnswer> = new Schema({
   pointsEarned: { type: Number, required: true, default: 0 },
 });
 
+/* ---------------- Result Schema ---------------- */
 const ResultSchema: Schema<IResult> = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
@@ -48,4 +51,5 @@ const ResultSchema: Schema<IResult> = new Schema(
   { timestamps: true }
 );
 
+/* ---------------- Export Model ---------------- */
 export default mongoose.model<IResult>("Result", ResultSchema);

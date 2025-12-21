@@ -1,12 +1,14 @@
-import mongoose, { Schema, Document, Types } from "mongoose";
+import mongoose, { Schema, Document, Model } from "mongoose";
 
+/* ---------------- Question Interface ---------------- */
 export interface Question {
   question: string;
   options: string[];
   correctAnswer: string;
-  points?: number;
+  points: number;
 }
 
+/* ---------------- Exam Interface ---------------- */
 export interface IExam extends Document {
   title: string;
   description: string;
@@ -21,20 +23,22 @@ export interface IExam extends Document {
   updatedAt: Date;
 }
 
+/* ---------------- Question Schema ---------------- */
 const QuestionSchema: Schema<Question> = new Schema({
   question: { type: String, required: true },
   options: { type: [String], required: true },
   correctAnswer: { type: String, required: true },
-  points: { type: Number, default: 1 },
+  points: { type: Number, required: true, default: 1 },
 });
 
+/* ---------------- Exam Schema ---------------- */
 const ExamSchema: Schema<IExam> = new Schema(
   {
     title: { type: String, required: true },
     description: { type: String, required: true },
     duration: { type: Number, required: true, default: 30 },
     totalQuestions: { type: Number, required: true, default: 0 },
-    totalPoints: { type: Number, required: true, default: 100 },
+    totalPoints: { type: Number, required: true, default: 0 },
     category: { type: String, required: true, default: "General" },
     difficulty: {
       type: String,
@@ -47,4 +51,13 @@ const ExamSchema: Schema<IExam> = new Schema(
   { timestamps: true }
 );
 
-export default mongoose.model<IExam>("Exam", ExamSchema);
+/* ---------------- Pre-save Hook ---------------- */
+// Automatically update totalQuestions and totalPoints based on questions
+ExamSchema.pre("save", function (this: IExam) {
+  this.totalQuestions = this.questions.length;
+  this.totalPoints = this.questions.reduce((sum, q) => sum + (q.points || 1), 0);
+});
+
+/* ---------------- Export Model ---------------- */
+const Exam: Model<IExam> = mongoose.model<IExam>("Exam", ExamSchema);
+export default Exam;

@@ -2,8 +2,8 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import authRoutes from "./routes/authRoutes";
-import dashboardRoutes from "./routes/dashboardRoutes";
+import authRoutes from "./routes/AuthRoutes";
+import dashboardRoutes from "./routes/DashboardRoutes";
 import feedbackRoutes from "./routes/FeedbackRoutes";
 
 dotenv.config();

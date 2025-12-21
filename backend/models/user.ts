@@ -6,6 +6,7 @@ export interface IUser extends Document {
   email: string;
   password: string;
   role: "user" | "admin";
+  isStudent: boolean;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
 
@@ -32,13 +33,18 @@ const UserSchema: Schema<IUser> = new Schema(
       type: String,
       required: true,
       minlength: 6,
-      select: false, // ⬅️ prevents leaking password
+      select: false,
     },
 
     role: {
       type: String,
       enum: ["user", "admin"],
       default: "user",
+    },
+
+    isStudent: {
+      type: Boolean,
+      default: true, // default new users as students
     },
 
     resetPasswordToken: {
@@ -58,9 +64,7 @@ const UserSchema: Schema<IUser> = new Schema(
    🔐 Hash password before save
 ========================= */
 UserSchema.pre<IUser>("save", async function () {
-  // Only hash if password is modified
   if (!this.isModified("password")) return;
-
   this.password = await bcrypt.hash(this.password, 10);
 });
 

@@ -1,27 +1,19 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion, useMotionValue, useTransform, animate, Variants } from 'framer-motion';
-import { GraduationCap, Clock, Shield, BarChart3, Users, Award, ArrowRight } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, useMotionValue, useTransform, animate, Variants } from "framer-motion";
+import { GraduationCap, Clock, Shield, BarChart3, Users, Award, ArrowRight } from "lucide-react";
 
-import { Button } from '@/components/ui/button';
-import { Header } from '@/components/layout/Header';
+import { Button } from "@/components/ui/button";
+import { Header } from "@/components/layout/Header";
 
-// Animations
+/* ---------------- Animations ---------------- */
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 30 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
-  },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } },
 };
+const stagger: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.12 } } };
 
-const stagger: Variants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.12 } },
-};
-
-// Animated Number Component
+/* ---------------- Animated Number ---------------- */
 const AnimatedNumber = ({ value }: { value: number }) => {
   const count = useMotionValue(0);
   const rounded = useTransform(count, (latest) => Math.round(latest));
@@ -34,95 +26,67 @@ const AnimatedNumber = ({ value }: { value: number }) => {
   return <motion.span>{rounded}</motion.span>;
 };
 
-// Features
+/* ---------------- Static Features ---------------- */
 const features = [
-  {
-    icon: Clock,
-    title: 'Timed Assessments',
-    description: 'Real-time countdown timers ensure fair and consistent testing.',
-  },
-  {
-    icon: Shield,
-    title: 'Secure Testing',
-    description: 'Advanced anti-cheating and secure exam submissions.',
-  },
-  {
-    icon: BarChart3,
-    title: 'Instant Results',
-    description: 'Immediate scores with detailed performance analytics.',
-  },
-  {
-    icon: Users,
-    title: 'Multi-User Roles',
-    description: 'Students & admins with role-based access control.',
-  },
+  { icon: Clock, title: "Timed Assessments", description: "Real-time countdown timers ensure fair testing." },
+  { icon: Shield, title: "Secure Testing", description: "Advanced anti-cheating & secure submissions." },
+  { icon: BarChart3, title: "Instant Results", description: "Immediate scores with deep performance analytics." },
+  { icon: Users, title: "Multi-User Roles", description: "Students & admins with role-based access." },
 ];
 
-// Types
+/* ---------------- Types ---------------- */
 type Stat = { value: number; label: string; suffix?: string };
 type Testimonial = { name: string; role: string; quote: string };
 
 const Index = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState<'student' | 'admin'>('student');
+  const [userRole, setUserRole] = useState<"student" | "admin">("student");
+
   const [stats, setStats] = useState<Stat[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingTestimonials, setLoadingTestimonials] = useState(true);
 
   const navigate = useNavigate();
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-  // Check login status
+  /* ---------------- Auth State ---------------- */
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     setIsLoggedIn(!!token);
-
-    const role = localStorage.getItem('role') as 'student' | 'admin' | null;
+    const role = localStorage.getItem("role") as "student" | "admin" | null;
     if (role) setUserRole(role);
   }, []);
 
-  // Fetch Stats
+  /* ---------------- Fetch Stats ---------------- */
   useEffect(() => {
     setLoadingStats(true);
-    fetch('/api/stats')
+    fetch(`${BACKEND_URL}/api/stats`)
       .then((res) => res.json())
-      .then((data: Stat[] | { stats: Stat[] }) => {
-        if (Array.isArray(data)) setStats(data);
-        else if ('stats' in data && Array.isArray(data.stats)) setStats(data.stats);
-        else setStats([]);
-      })
+      .then((data) => setStats(Array.isArray(data?.stats) ? data.stats : [])) // ✅ safely extract array
       .catch(() => setStats([]))
       .finally(() => setLoadingStats(false));
-  }, []);
+  }, [BACKEND_URL]);
 
-  // Fetch Testimonials
+  /* ---------------- Fetch Testimonials ---------------- */
   useEffect(() => {
     setLoadingTestimonials(true);
-    fetch('/api/testimonials')
+    fetch(`${BACKEND_URL}/api/testimonials`)
       .then((res) => res.json())
-      .then((data: Testimonial[] | { testimonials: Testimonial[] }) => {
-        if (Array.isArray(data)) setTestimonials(data);
-        else if ('testimonials' in data && Array.isArray(data.testimonials)) setTestimonials(data.testimonials);
-        else setTestimonials([]);
-      })
+      .then((data) => setTestimonials(Array.isArray(data?.testimonials) ? data.testimonials : [])) // ✅ safely extract array
       .catch(() => setTestimonials([]))
       .finally(() => setLoadingTestimonials(false));
-  }, []);
+  }, [BACKEND_URL]);
 
-  const heroLink = isLoggedIn ? (userRole === 'admin' ? '/admin' : '/dashboard') : '/register';
-  const heroLabel = isLoggedIn ? 'Go to Dashboard' : 'Get Started Free';
+  const heroLink = isLoggedIn ? (userRole === "admin" ? "/admin" : "/dashboard") : "/register";
+  const heroLabel = isLoggedIn ? "Go to Dashboard" : "Get Started Free";
 
   return (
     <div className="min-h-screen gradient-hero overflow-hidden">
       <Header isLoggedIn={isLoggedIn} userRole={userRole} />
 
-      {/* Hero Section */}
-      <section className="relative container py-28">
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-1/3 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-primary/30 blur-3xl" />
-          <div className="absolute bottom-0 right-0 h-80 w-80 bg-accent/30 blur-3xl" />
-        </div>
-
+      {/* ---------------- Hero ---------------- */}
+      <section className="container py-28 relative">
         <motion.div variants={stagger} initial="hidden" animate="show" className="grid lg:grid-cols-2 gap-16 items-center">
           <motion.div variants={fadeUp} className="space-y-8">
             <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold">
@@ -131,79 +95,48 @@ const Index = () => {
             </span>
 
             <h1 className="text-5xl md:text-6xl xl:text-7xl font-extrabold leading-tight">
-              Smarter Exams. <br />
-              <span className="text-gradient animate-gradient">Better Results.</span>
+              Smarter Exams.<br />
+              <span className="text-gradient">Better Results.</span>
             </h1>
 
             <p className="text-lg text-muted-foreground max-w-xl">
-              ExamPro is a next-generation online examination platform built for secure testing, real-time analytics, and better learning outcomes.
+              ExamPro is a next-gen online examination platform with secure testing, real-time analytics, and better learning outcomes.
             </p>
 
-            <div className="flex flex-wrap gap-4">
+            <div className="flex gap-4">
               <Link to={heroLink}>
                 <Button size="xl" variant="hero" className="group">
                   {heroLabel}
-                  <ArrowRight className="ml-1 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="ml-1 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-
               <Link to="/exams">
-                <Button size="xl" variant="outline">
-                  Browse Exams
-                </Button>
+                <Button size="xl" variant="outline">Browse Exams</Button>
               </Link>
             </div>
           </motion.div>
 
-          {/* Example Dashboard Card */}
-          <motion.div variants={fadeUp} whileHover={{ y: -8 }} transition={{ type: 'spring', stiffness: 120 }} className="hidden lg:block">
-            <div className="backdrop-blur-xl bg-card/80 border border-border/60 rounded-3xl p-8 shadow-2xl">
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-xl gradient-primary flex items-center justify-center">
-                      <GraduationCap className="h-6 w-6 text-primary-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">JavaScript Fundamentals</h3>
-                      <p className="text-sm text-muted-foreground">10 Questions • 30 Minutes</p>
-                    </div>
-                  </div>
-                  <span className="text-2xl font-bold text-success">85%</span>
-                </div>
-
-                <div className="h-2 rounded-full bg-secondary overflow-hidden">
-                  <div className="h-full w-[85%] gradient-primary rounded-full" />
-                </div>
-
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div className="p-3 rounded-lg bg-secondary/50">
-                    <div className="text-xl font-bold">8</div>
-                    <div className="text-xs text-muted-foreground">Correct</div>
-                  </div>
-                  <div className="p-3 rounded-lg bg-secondary/50">
-                    <div className="text-xl font-bold">2</div>
-                    <div className="text-xs text-muted-foreground">Wrong</div>
-                  </div>
-                  <div className="p-3 rounded-lg bg-secondary/50">
-                    <div className="text-xl font-bold">22m</div>
-                    <div className="text-xs text-muted-foreground">Time</div>
-                  </div>
-                </div>
+          {/* Preview Card */}
+          <motion.div variants={fadeUp} whileHover={{ y: -8 }} className="hidden lg:block">
+            <div className="rounded-3xl bg-card/80 backdrop-blur border p-8 shadow-2xl">
+              <div className="flex items-center justify-between mb-6">
+                <GraduationCap className="h-8 w-8 text-primary" />
+                <span className="text-2xl font-bold text-success">85%</span>
+              </div>
+              <div className="h-2 rounded-full bg-secondary">
+                <div className="h-full w-[85%] gradient-primary rounded-full" />
               </div>
             </div>
           </motion.div>
         </motion.div>
       </section>
 
-      {/* Stats Section */}
+      {/* ---------------- Stats ---------------- */}
       <section className="container py-16">
         {loadingStats ? (
           <p className="text-center text-muted-foreground">Loading stats...</p>
-        ) : stats.length === 0 ? (
-          <p className="text-center text-muted-foreground">No stats available</p>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 rounded-2xl bg-card/80 backdrop-blur border border-border/60 p-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 rounded-2xl bg-card/80 backdrop-blur border p-10">
             {stats.map((stat, i) => (
               <div key={i} className="text-center">
                 <div className="text-4xl font-extrabold text-gradient">
@@ -217,7 +150,7 @@ const Index = () => {
         )}
       </section>
 
-      {/* Features Section */}
+      {/* ---------------- Features ---------------- */}
       <section className="container py-24">
         <div className="text-center max-w-2xl mx-auto mb-14">
           <h2 className="text-4xl font-extrabold mb-4">Everything You Need to Succeed</h2>
@@ -225,33 +158,33 @@ const Index = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((feature, i) => (
-            <motion.div key={i} whileHover={{ y: -6 }} transition={{ type: 'spring', stiffness: 200 }} className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
+          {features.map((f, i) => (
+            <motion.div key={i} whileHover={{ y: -6 }} className="p-6 rounded-2xl bg-card border hover:shadow-xl">
               <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                <feature.icon className="h-6 w-6 text-primary" />
+                <f.icon className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="font-semibold mb-2">{feature.title}</h3>
-              <p className="text-sm text-muted-foreground">{feature.description}</p>
+              <h3 className="font-semibold mb-2">{f.title}</h3>
+              <p className="text-sm text-muted-foreground">{f.description}</p>
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* ---------------- Testimonials ---------------- */}
       <section className="container py-24">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <h2 className="text-4xl font-extrabold mb-4">Loved by Students & Educators</h2>
-          <p className="text-muted-foreground">Real feedback from real users.</p>
+          <p className="text-muted-foreground">Feedback from users.</p>
         </div>
 
         {loadingTestimonials ? (
-          <p className="text-center text-muted-foreground">Loading testimonials...</p>
+          <p className="text-center text-muted-foreground">Loading feedback...</p>
         ) : testimonials.length === 0 ? (
-          <p className="text-center text-muted-foreground">No testimonials available</p>
+          <p className="text-center text-muted-foreground">No feedback yet.</p>
         ) : (
           <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map((t, i) => (
-              <motion.div key={i} whileHover={{ y: -6 }} transition={{ type: 'spring', stiffness: 200 }} className="p-6 rounded-2xl bg-card border border-border/50 hover:shadow-xl hover:shadow-primary/10">
+              <motion.div key={i} whileHover={{ y: -6 }} className="p-6 rounded-2xl bg-card border">
                 <p className="text-muted-foreground mb-4">“{t.quote}”</p>
                 <div className="font-semibold">{t.name}</div>
                 <div className="text-xs text-muted-foreground">{t.role}</div>
@@ -261,15 +194,13 @@ const Index = () => {
         )}
       </section>
 
-      {/* CTA Section */}
+      {/* ---------------- CTA ---------------- */}
       <section className="container py-24">
         <div className="rounded-3xl gradient-primary p-16 text-center">
           <h2 className="text-4xl font-extrabold text-primary-foreground mb-4">Start Examining Smarter Today</h2>
-          <p className="text-primary-foreground/80 max-w-xl mx-auto mb-10">
-            Join thousands of learners achieving better results with ExamPro.
-          </p>
+          <p className="text-primary-foreground/80 max-w-xl mx-auto mb-10">Join thousands of learners achieving better results with ExamPro.</p>
           <Link to={heroLink}>
-            <Button size="xl" className="bg-background text-foreground hover:bg-background/90">
+            <Button size="xl" className="bg-background text-foreground">
               {heroLabel}
               <ArrowRight className="ml-2" />
             </Button>
@@ -277,11 +208,9 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border/50 py-10">
-        <div className="container flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">© 2025 ExamPro. All rights reserved.</p>
-        </div>
+      {/* ---------------- Footer ---------------- */}
+      <footer className="border-t py-10">
+        <div className="container text-center text-sm text-muted-foreground">© 2025 ExamPro. All rights reserved.</div>
       </footer>
     </div>
   );
