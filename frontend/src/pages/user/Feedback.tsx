@@ -69,7 +69,7 @@ const Feedback = () => {
             </h1>
             <p className="text-muted-foreground text-lg">
               Help us improve ExamPro by sharing your honest experience.
-              Your voice matters.
+              Your feedback matters.
             </p>
           </div>
 

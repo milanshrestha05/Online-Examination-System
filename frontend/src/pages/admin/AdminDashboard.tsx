@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Header } from "@/components/layout/Header";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import { BookOpen, Users, TrendingUp, Trash2, Eye, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
+import AdminNavbar from "./AdminNavbar"; // <-- import the new navbar
 
 type Exam = {
   _id: string;
@@ -173,15 +173,8 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header
-        isLoggedIn
-        userRole="admin"
-        onLogout={() => {
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
-          navigate("/adminlogin", { replace: true });
-        }}
-      />
+      {/* REPLACED HEADER WITH ADMIN NAVBAR */}
+      <AdminNavbar />
 
       <main className="container py-8">
         {/* Stats */}

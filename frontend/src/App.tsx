@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import ProtectedRoute from "./pages/admin/ProtectedRoute";
 
@@ -24,6 +24,7 @@ import NotFound from "./pages/user/NotFound";
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminLogin from "./pages/admin/AdminLogin";
+import ManageExam from "./pages/admin/ManageExam";
 
 const queryClient = new QueryClient();
 
@@ -47,7 +48,6 @@ const App = () => (
           <Route path="/adminlogin" element={<AdminLogin />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="*" element={<NotFound />} />
 
           {/* Protected User Routes */}
           <Route
@@ -107,7 +107,7 @@ const App = () => (
             }
           />
 
-          {/* Protected Admin Route */}
+          {/* Protected Admin Routes */}
           <Route
             path="/admin"
             element={
@@ -116,6 +116,17 @@ const App = () => (
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/admin/exams"
+            element={
+              <ProtectedRoute adminOnly>
+                <ManageExam />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Catch-all 404 */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
