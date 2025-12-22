@@ -79,6 +79,10 @@ const Feedback = () => {
             <div className="relative">
               <User className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
               <input
+                id="full-name"
+                name="name"
+                type="text"
+                autoComplete="name"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -91,6 +95,10 @@ const Feedback = () => {
             <div className="relative">
               <Briefcase className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
               <input
+                id="role"
+                name="role"
+                type="text"
+                autoComplete="organization-title"
                 required
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
@@ -103,7 +111,10 @@ const Feedback = () => {
             <div className="relative">
               <Mail className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
               <input
+                id="email"
+                name="email"
                 type="email"
+                autoComplete="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -116,6 +127,9 @@ const Feedback = () => {
             <div className="relative">
               <MessageSquare className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
               <textarea
+                id="feedback"
+                name="feedback"
+                autoComplete="off"
                 required
                 rows={4}
                 value={quote}
@@ -135,6 +149,7 @@ const Feedback = () => {
                   onMouseLeave={() => setHoverRating(0)}
                   onClick={() => setRating(star)}
                   className="transition-transform hover:scale-110"
+                  aria-label={`Rate ${star} star`}
                 >
                   <Star
                     className={`h-7 w-7 ${

@@ -126,12 +126,16 @@ const Profile = () => {
               <>
                 <InputField
                   label="Name"
+                  name="name"
+                  autoComplete="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
                 <InputField
                   label="New Password"
+                  name="password"
                   type="password"
+                  autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Leave blank to keep current password"
@@ -210,17 +214,29 @@ const ProfileRow = ({
 
 const InputField = ({
   label,
+  id,
+  name,
+  autoComplete,
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement> & {
   label: string;
-}) => (
-  <div className="flex flex-col gap-2">
-    <label className="text-sm font-medium">{label}</label>
-    <input
-      {...props}
-      className="rounded-xl border border-border bg-background px-4 py-3 outline-none focus:ring-2 focus:ring-primary"
-    />
-  </div>
-);
+}) => {
+  const inputId = id || name || label.toLowerCase().replace(/\s+/g, "-");
+
+  return (
+    <div className="flex flex-col gap-2">
+      <label htmlFor={inputId} className="text-sm font-medium">
+        {label}
+      </label>
+      <input
+        id={inputId}
+        name={name || inputId}
+        autoComplete={autoComplete}
+        {...props}
+        className="rounded-xl border border-border bg-background px-4 py-3 outline-none focus:ring-2 focus:ring-primary"
+      />
+    </div>
+  );
+};
 
 export default Profile;

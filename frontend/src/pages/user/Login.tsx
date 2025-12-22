@@ -35,9 +35,7 @@ const Login = () => {
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
       });
 
@@ -48,18 +46,12 @@ const Login = () => {
         return;
       }
 
-      // ✅ Store JWT & user info
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
       toast.success("Welcome back!");
 
-      // ✅ Role-based redirect
-      if (data.user.role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate("/dashboard");
-      }
+      navigate(data.user.role === "admin" ? "/admin" : "/dashboard");
     } catch {
       toast.error("Server not responding");
     } finally {
@@ -84,9 +76,7 @@ const Login = () => {
               <div className="mx-auto h-14 w-14 rounded-xl gradient-primary flex items-center justify-center mb-4 shadow-lg">
                 <GraduationCap className="h-7 w-7 text-primary-foreground" />
               </div>
-              <CardTitle className="text-2xl">
-                Welcome back
-              </CardTitle>
+              <CardTitle className="text-2xl">Welcome back</CardTitle>
               <CardDescription>
                 Sign in to continue to ExamPro
               </CardDescription>
@@ -101,11 +91,14 @@ const Login = () => {
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="email"
+                      name="email"
                       type="email"
+                      autoComplete="email"
                       placeholder="Enter your email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="pl-10"
+                      required
                     />
                   </div>
                 </div>
@@ -117,26 +110,36 @@ const Login = () => {
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="password"
+                      name="password"
                       type="password"
+                      autoComplete="current-password"
                       placeholder="Enter your password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="pl-10"
+                      required
                     />
                   </div>
                 </div>
 
                 {/* Remember / Forgot */}
                 <div className="flex items-center justify-between text-sm">
-                  <label className="flex items-center gap-2 cursor-pointer">
+                  <label
+                    htmlFor="remember"
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
                     <input
+                      id="remember"
+                      name="remember"
                       type="checkbox"
+                      autoComplete="off"
                       className="rounded border-input"
                     />
                     <span className="text-muted-foreground">
                       Remember me
                     </span>
                   </label>
+
                   <Link
                     to="/forgot-password"
                     className="text-primary hover:underline"

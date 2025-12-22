@@ -48,14 +48,8 @@ const Register = () => {
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password })
       });
 
       const data = await response.json();
@@ -67,7 +61,7 @@ const Register = () => {
 
       toast.success("Account created successfully!");
       navigate("/login");
-    } catch (error) {
+    } catch {
       toast.error("Server not responding");
     } finally {
       setIsLoading(false);
@@ -113,10 +107,14 @@ const Register = () => {
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="name"
+                      name="name"
+                      type="text"
+                      autoComplete="name"
                       placeholder="Enter your name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       className="pl-10"
+                      required
                     />
                   </div>
                 </div>
@@ -128,11 +126,14 @@ const Register = () => {
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="email"
+                      name="email"
                       type="email"
+                      autoComplete="email"
                       placeholder="Enter your email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="pl-10"
+                      required
                     />
                   </div>
                 </div>
@@ -144,11 +145,14 @@ const Register = () => {
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="password"
+                      name="password"
                       type="password"
+                      autoComplete="new-password"
                       placeholder="Create a password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="pl-10"
+                      required
                     />
                   </div>
                 </div>
@@ -162,13 +166,16 @@ const Register = () => {
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="confirmPassword"
+                      name="confirmPassword"
                       type="password"
+                      autoComplete="new-password"
                       placeholder="Confirm your password"
                       value={confirmPassword}
                       onChange={(e) =>
                         setConfirmPassword(e.target.value)
                       }
                       className="pl-10"
+                      required
                     />
                   </div>
                 </div>
@@ -176,11 +183,17 @@ const Register = () => {
                 {/* Terms */}
                 <div className="flex items-center gap-2 text-sm">
                   <input
+                    id="terms"
+                    name="terms"
                     type="checkbox"
+                    autoComplete="off"
                     required
                     className="rounded border-input"
                   />
-                  <span className="text-muted-foreground">
+                  <label
+                    htmlFor="terms"
+                    className="text-muted-foreground"
+                  >
                     I agree to the{" "}
                     <Link
                       to="/terms"
@@ -195,7 +208,7 @@ const Register = () => {
                     >
                       Privacy Policy
                     </Link>
-                  </span>
+                  </label>
                 </div>
 
                 {/* Submit */}
