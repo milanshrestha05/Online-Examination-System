@@ -46,12 +46,18 @@ const Login = () => {
         return;
       }
 
+      // Prevent admins from logging in through user portal
+      if (data.user.role === "admin") {
+        toast.error("Admin cannot log in here!");
+        return;
+      }
+
+      // Store token & user info
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
       toast.success("Welcome back!");
-
-      navigate(data.user.role === "admin" ? "/admin" : "/dashboard");
+      navigate("/dashboard");
     } catch {
       toast.error("Server not responding");
     } finally {

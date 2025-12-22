@@ -1,37 +1,59 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { toast } from 'sonner';
-import { Lock, User } from 'lucide-react';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Lock, User } from "lucide-react";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
-  const [credentials, setCredentials] = useState({ email: '', password: '', remember: false });
+  const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!credentials.email || !credentials.password) {
-      toast.error('Please fill in all fields');
+      toast.error("Please fill in all fields");
       return;
     }
 
     setLoading(true);
 
-    // Mock authentication delay
-    setTimeout(() => {
-      setLoading(false);
-      if (credentials.email === 'admin@example.com' && credentials.password === 'admin123') {
-        toast.success('Login successful!');
-        navigate('/admin'); // redirect to AdminDashboard
-      } else {
-        toast.error('Invalid credentials');
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.message || "Login failed");
+        return;
       }
-    }, 1000);
+
+      // Only allow admin users
+      if (data.user.role !== "admin") {
+        toast.error("Access denied. Admins only.");
+        return;
+      }
+
+      // Save token & user info
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      toast.success("Login successful!");
+      navigate("/admin");
+    } catch {
+      toast.error("Server not responding");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -45,35 +67,43 @@ const AdminLogin = () => {
         <h2 className="text-3xl font-bold text-center mb-6 text-gradient">Admin Login</h2>
         <form className="space-y-4" onSubmit={handleLogin}>
           <div className="space-y-1">
-            <label className="text-sm font-medium">Email</label>
+            <label htmlFor="admin-email" className="text-sm font-medium">Email</label>
             <div className="relative">
               <Input
+                id="admin-email"
+                name="email"
                 type="email"
-                placeholder="admin@example.com"
+                placeholder="Enter admin email"
                 value={credentials.email}
                 onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
                 required
+                autoComplete="off"
+                className="pr-10"
               />
               <User className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
             </div>
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm font-medium">Password</label>
+            <label htmlFor="admin-password" className="text-sm font-medium">Password</label>
             <div className="relative">
               <Input
+                id="admin-password"
+                name="password"
                 type="password"
-                placeholder="********"
+                placeholder="Enter password"
                 value={credentials.password}
                 onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
                 required
+                autoComplete="new-password"
+                className="pr-10"
               />
               <Lock className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
             </div>
           </div>
 
           <Button type="submit" size="lg" className="w-full mt-2" disabled={loading}>
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? "Logging in..." : "Login"}
           </Button>
         </form>
 
